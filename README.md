@@ -1,13 +1,21 @@
 # glog
 
-FIXME: description
+General logging utility. 
+Enforce a simple log pattern for script execution and automation.
 
 ## Installation
 
-Download from http://example.com/FIXME.
+Clone or Download from https://github.com/StephenBergeron/glog
+
+In your bash profile, source the `glog_env.bash` utility:
+```bash
+$ . ${HOME}/projects/glog/conf/glog_env.bash
+```
+
 
 ## Usage
 
+glog 
 FIXME: explanation
 
     $ java -jar glog-0.1.0-standalone.jar [args]
