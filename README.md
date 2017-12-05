@@ -5,13 +5,13 @@ Enforce a simple log pattern for script execution and automation.
 
 ## Installation
 
-Clone or Download from https://github.com/StephenBergeron/glog
-
+Clone or download from https://github.com/StephenBergeron/glog
+Typically I would clone into `${HOME}/projects/`. Assuming you use the same location, 
 In your bash profile, source the `glog_env.bash` utility:
 ```bash
 $ . ${HOME}/projects/glog/conf/glog_env.bash
 ```
-
+You can use other location, as far as the bash_profile point to the correct location.
 
 ## Usage
 
