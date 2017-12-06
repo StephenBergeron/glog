@@ -10,22 +10,41 @@
        (clojure.string/split
         (slurp (System/getenv "___glog_file")) #"\n")))
 
-(def common-keys
-  "Each glog entries have a common set of keys"
-  (reduce set/intersection (map (fn [x] (into #{} (keys x))) glog)))
+(def lowpass
+  "Each glog entries have a common set of keys.  This set is suitable to
+  focus on large block of execution.  There are strong analogies with
+  lowpass filter in signal theory. Even the ordering of the column name
+  is similar to the frequency or a wavenumber."
+  ["wfm_cloudappname" "db_dump" "context" "simulation" ])
 
-(defn glog-header
+(def header
+  (map (fn [x] (select-keys x lowpass)) glog))
+
+(def details
+  (map (fn [x] (disj x lowpass)) glog))
+
+
+
+(defn glog-header-internal
   "Extract the header for the current datum"
   [previous current]
-  ;; Everything that belongs to the common-keys
+  ;; Everything that belongs to the lowpass
   ;; and that is different from the previous
   ;; is assembled into the glog-header
   nil)
+
+
 
 ;; (def header-construct
 ;;   (let [s1 glog
 ;;         s2 glog]))
 
+(t/deftest adhoc-test
+  (t/testing "Run some adhoc evaluation."
+    (do
+      (printf "header: %n")
+      (clojure.pprint/pprint header)
+      (t/is (> 42 13 )))))
 
 (t/deftest glog-type-test
   (t/testing "The tabloid structure is a lazy sequence of some Map."
@@ -35,10 +54,7 @@
 
 (t/deftest glog-contains-data-test
   (t/testing "Ensure that we have some data in the glog."
-    (t/is (> (count glog) 10))))
-
-(t/deftest common-keys-are-well-known-test
-  (t/testing "The common keys are well known"
-    (t/is (=
-           #{"ts" "db_dump" "context" "simulation" "wfm_cloudappname"}
-           common-keys))))
+    (let [card (count glog)]
+      (do
+        (printf "glog cardinality: %s%n" card)
+        (t/is (> card 30 ))))))
