@@ -21,17 +21,45 @@
   (map (fn [x] (select-keys x lowpass)) glog))
 
 (def details
-  (map (fn [x] (dissoc x lowpass)) glog))
+  (map (fn [x] (apply (partial dissoc x) lowpass)) glog))
+
+;; (def details
+;;   (map (fn [x] (dissoc x "wfm_cloudappname" "db_dump")) glog))
 
 
+(def tdh240
+  (loop [pile  (reverse glog)
+         futur (drop 1 pile)
+         res   nil]
+    (let [p (first pile)
+          h (select-keys p lowpass)
+          d (apply (partial dissoc p) lowpass)
+          rho (concat res d h)]
+      (if (empty? futur)
+        rho
+        (let [f  (first futur)
+              hf (select-keys f lowpass)
+              eta  (if (= h hf)
+                   (concat res d '("------"))
+                   (concat res d '("======")))]
+          (recur (drop 1 pile) (drop 1 futur) eta))))))
 
-(defn glog-header-internal
-  "Extract the header for the current datum"
-  [previous current]
-  ;; Everything that belongs to the lowpass
-  ;; and that is different from the previous
-  ;; is assembled into the glog-header
-  nil)
+
+;; (defn tdh238 [acc datum]
+;;   (let [
+;;         ]
+;;     ) [d h_cond])
+
+;; (def header-visibility
+;;   "Extract the header for the current datum. The difficulty here is to
+;;   deal with the [previous current] datum. My first attempt is to start
+;;   from the end"
+;;   ;; Everything that belongs to the lowpass
+;;   ;; and that is different from the previous
+;;   ;; is assembled into the glog-header
+;;   ;; (map (fn [x] ({x ""}))
+;;   ;; let's start from the end
+;;   (reduce tdh238 (drop 1 (reverse glog)) (reverse glog)))
 
 
 
@@ -42,9 +70,14 @@
 (t/deftest adhoc-test
   (t/testing "Run some adhoc evaluation."
     (do
-      (printf "header: %n")
+      ;; (printf "reverse tdh240: %n")
+      ;; (clojure.pprint/pprint (reverse tdh240))
+      (printf "detail: %n")
       (clojure.pprint/pprint details)
-      (t/is (> 42 13 )))))
+      ;;(printf "header: %n")
+      ;;(clojure.pprint/pprint header)
+      (t/is (> 42 13 ))
+      )))
 
 (t/deftest glog-type-test
   (t/testing "The tabloid structure is a lazy sequence of some Map."
