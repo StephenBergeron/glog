@@ -21,7 +21,7 @@
   (map (fn [x] (select-keys x lowpass)) glog))
 
 (def details
-  (map (fn [x] (disj x lowpass)) glog))
+  (map (fn [x] (dissoc x lowpass)) glog))
 
 
 
@@ -43,7 +43,7 @@
   (t/testing "Run some adhoc evaluation."
     (do
       (printf "header: %n")
-      (clojure.pprint/pprint header)
+      (clojure.pprint/pprint details)
       (t/is (> 42 13 )))))
 
 (t/deftest glog-type-test
