@@ -2,7 +2,8 @@
   (:require [clojure.test :as t]
             [glog.core :as sut]
             [clojure.set :as set]
-            [clojure.data.json :as json]))
+            [clojure.data.json :as json]
+            [clojure.data :as data]))
 
 (def glog
   "The glog file content in a tabloid data structure."
@@ -23,57 +24,67 @@
 (def details
   (map (fn [x] (apply (partial dissoc x) lowpass)) glog))
 
-;; (def details
-;;   (map (fn [x] (dissoc x "wfm_cloudappname" "db_dump")) glog))
+(def header-visibility
+  (loop [p0 0
+         p1 1
+         acc [true]] ; the first item must have a visible header
+    (if (< p1 (- (count header) 1))
+        (let [h0 (nth header p0)
+              h1 (nth header p1)
+              [delta1 delta2 delta3]  (data/diff h0 h1)]
+          (if (nil? delta1)
+              (recur p1 (+ p1 1) (conj acc false))
+              (recur p1 (+ p1 1) (conj acc true)))) acc)))
 
 
-(def tdh240
-  (loop [pile  (reverse glog)
-         futur (drop 1 pile)
-         res   nil]
+
+(def traverse
+  (loop [pile  glog
+         ;;futur (drop 1 pile)
+         ]
     (let [p (first pile)
           h (select-keys p lowpass)
           d (apply (partial dissoc p) lowpass)
-          rho (concat res d h)]
-      (if (empty? futur)
-        rho
-        (let [f  (first futur)
-              hf (select-keys f lowpass)
-              eta  (if (= h hf)
-                   (concat res d '("------"))
-                   (concat res d '("======")))]
-          (recur (drop 1 pile) (drop 1 futur) eta))))))
+          rho (concat d h)]
+      h
+      )))
 
 
-;; (defn tdh238 [acc datum]
-;;   (let [
-;;         ]
-;;     ) [d h_cond])
+;; (if (empty? futur)
+;;         rho
+;;         (let [f  (first futur)
+;;               hf (select-keys f lowpass)
+;;               eta  (if (= h hf)
+;;                    (concat d '("------"))
+;;                    (concat d h))]
+;;           (recur (drop 1 pile) (drop 1 futur))))
 
-;; (def header-visibility
-;;   "Extract the header for the current datum. The difficulty here is to
-;;   deal with the [previous current] datum. My first attempt is to start
-;;   from the end"
-;;   ;; Everything that belongs to the lowpass
-;;   ;; and that is different from the previous
-;;   ;; is assembled into the glog-header
-;;   ;; (map (fn [x] ({x ""}))
-;;   ;; let's start from the end
-;;   (reduce tdh238 (drop 1 (reverse glog)) (reverse glog)))
+;; (def tdh240
+;;   (loop [pile  (reverse glog)
+;;          futur (drop 1 pile)]
+;;     (let [p (first pile)
+;;           h (select-keys p lowpass)
+;;           d (apply (partial dissoc p) lowpass)
+;;           rho (concat d h)]
+;;       (if (empty? futur)
+;;         (reverse rho)
+;;         (let [f  (first futur)
+;;               hf (select-keys f lowpass)
+;;               eta  (if (= h hf)
+;;                    (concat d '("------"))
+;;                    (concat d h))]
+;;           (recur (drop 1 pile) (drop 1 futur)))))))
 
-
-
-;; (def header-construct
-;;   (let [s1 glog
-;;         s2 glog]))
 
 (t/deftest adhoc-test
   (t/testing "Run some adhoc evaluation."
     (do
-      ;; (printf "reverse tdh240: %n")
-      ;; (clojure.pprint/pprint (reverse tdh240))
-      (printf "detail: %n")
-      (clojure.pprint/pprint details)
+      (printf "traverse: %n")
+      (clojure.pprint/pprint header-visibility)
+      ;; (printf "tdh240: %n")
+      ;; (clojure.pprint/pprint tdh240)
+      ;; (printf "detail: %n")
+      ;; (clojure.pprint/pprint details)
       ;;(printf "header: %n")
       ;;(clojure.pprint/pprint header)
       (t/is (> 42 13 ))
