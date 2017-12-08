@@ -27,15 +27,15 @@
 (def header-visibility
   (loop [p0 0
          p1 1
-         acc [true]] ; the first item must have a visible header
+         acc [(first header)]]           ; the first item must have a visible header
     (if (< p1 (count header))
         (let [h0 (nth header p0)
               h1 (nth header p1)
               [delta1 delta2 delta3]  (data/diff h0 h1)]
           (if (nil? delta1)
-              (recur p1 (+ p1 1) (conj acc false))
-              (recur p1 (+ p1 1) (conj acc true)))) acc)))
-
+              (recur p1 (+ p1 1) (conj acc {}))
+              (recur p1 (+ p1 1) (conj acc h1))))
+        (lazy-seq acc))))
 
 (t/deftest adhoc-test
   (t/testing "Run some adhoc evaluation."
