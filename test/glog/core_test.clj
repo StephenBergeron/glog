@@ -28,7 +28,7 @@
   (loop [p0 0
          p1 1
          acc [true]] ; the first item must have a visible header
-    (if (< p1 (- (count header) 1))
+    (if (< p1 (count header))
         (let [h0 (nth header p0)
               h1 (nth header p1)
               [delta1 delta2 delta3]  (data/diff h0 h1)]
@@ -37,49 +37,12 @@
               (recur p1 (+ p1 1) (conj acc true)))) acc)))
 
 
-
-(def traverse
-  (loop [pile  glog
-         ;;futur (drop 1 pile)
-         ]
-    (let [p (first pile)
-          h (select-keys p lowpass)
-          d (apply (partial dissoc p) lowpass)
-          rho (concat d h)]
-      h
-      )))
-
-
-;; (if (empty? futur)
-;;         rho
-;;         (let [f  (first futur)
-;;               hf (select-keys f lowpass)
-;;               eta  (if (= h hf)
-;;                    (concat d '("------"))
-;;                    (concat d h))]
-;;           (recur (drop 1 pile) (drop 1 futur))))
-
-;; (def tdh240
-;;   (loop [pile  (reverse glog)
-;;          futur (drop 1 pile)]
-;;     (let [p (first pile)
-;;           h (select-keys p lowpass)
-;;           d (apply (partial dissoc p) lowpass)
-;;           rho (concat d h)]
-;;       (if (empty? futur)
-;;         (reverse rho)
-;;         (let [f  (first futur)
-;;               hf (select-keys f lowpass)
-;;               eta  (if (= h hf)
-;;                    (concat d '("------"))
-;;                    (concat d h))]
-;;           (recur (drop 1 pile) (drop 1 futur)))))))
-
-
 (t/deftest adhoc-test
   (t/testing "Run some adhoc evaluation."
     (do
-      (printf "traverse: %n")
+      (printf "header: %n")
+      (print header)
+      (printf "header-visibility: %n")
       (clojure.pprint/pprint header-visibility)
       ;; (printf "tdh240: %n")
       ;; (clojure.pprint/pprint tdh240)
