@@ -47,7 +47,7 @@
       ;(printf "header: %n")
       ;(print header)
       (printf "interleave: %n")
-      (clojure.pprint/pprint glog-preproc)
+      (clojure.pprint/pprint (remove nil? glog-preproc))
       ;(printf "header-visibility: %n")
       ;(clojure.pprint/pprint header-visibility)
       ;; (printf "tdh240: %n")
