@@ -11,6 +11,9 @@
        (clojure.string/split
         (slurp (System/getenv "___glog_file")) #"\n")))
 
+
+
+
 (def lowpass
   "Each glog entries have a common set of keys.  This set is suitable to
   focus on large block of execution.  There are strong analogies with
@@ -27,63 +30,75 @@
 (def header-visibility
   (loop [p0  0
          p1  1
-         acc [(first header)]]           ; the first item must have a visible header
+         acc [(first header)]] ; the first item must have a visible header
     (if (< p1 (count header))
         (let [h0 (nth header p0)
               h1 (nth header p1)
-              [_ delta _]  (data/diff h0 h1)
-              epsilon (if (nil? delta) delta (into delta {"header" true "emphasize" "-----"}))]
-          (recur p1 (+ p1 1) (conj acc epsilon)))
+              [_ delta _]  (data/diff h0 h1)]
+          (recur p1 (+ p1 1) (conj acc delta)))
         (lazy-seq acc))))
 
-(def glog-preproc
+(def glog-preproc-raw
   (interleave header-visibility details))
 
+(def glog-preproc
+  (remove nil? glog-preproc-raw))
 
+;; (t/deftest adhoc-test
+;;   (t/testing "Run some adhoc evaluation."
+;;     (do
+;;       ;(printf "header: %n")
+;;       ;(print header)
+;;       (printf "interleave: %n")
+;;       (clojure.pprint/pprint glog-preproc)
+;;       (spit (str (System/getenv "___glog_file") ".analysis.json") (json/write-str glog-preproc))
+;;       ;(printf "header-visibility: %n")
+;;       ;(clojure.pprint/pprint header-visibility)
+;;       ;; (printf "tdh240: %n")
+;;       ;; (clojure.pprint/pprint tdh240)
+;;       ;; (printf "detail: %n")
+;;       ;; (clojure.pprint/pprint details)
+;;       ;;(printf "header: %n")
+;;       ;;(clojure.pprint/pprint header)
+;;       (t/is (> 42 13 ))
+;;       )))
 
-(t/deftest adhoc-test
-  (t/testing "Run some adhoc evaluation."
-    (do
-      ;(printf "header: %n")
-      ;(print header)
-      (printf "interleave: %n")
-      (clojure.pprint/pprint (remove nil? glog-preproc))
-      ;(printf "header-visibility: %n")
-      ;(clojure.pprint/pprint header-visibility)
-      ;; (printf "tdh240: %n")
-      ;; (clojure.pprint/pprint tdh240)
-      ;; (printf "detail: %n")
-      ;; (clojure.pprint/pprint details)
-      ;;(printf "header: %n")
-      ;;(clojure.pprint/pprint header)
-      (t/is (> 42 13 ))
-      )))
-
-
-(t/deftest glog-preproc-test
-  (t/testing "The cardinality of glog-preproc is twice the original tabloid."
-    (t/is (= (count glog-preproc) (* 2 (count glog))))))
-
-(t/deftest cardinality-interleave-test
-  (t/testing "The cardinality of the interleave tabloid is the same as the header and the details."
-    (t/is (= (count (interleave header details)) (+ (count header) (count details))))))
 
 (t/deftest cardinality-header-test
-  (t/testing "The cardinality of the header tabloid is the same as the original tabloid."
+  (t/testing
+      "The cardinality of the header tabloid is the same as the original tabloid."
     (t/is (= (count glog) (count header) ))))
 
 (t/deftest cardinality-detail-test
-  (t/testing "The cardinality of the details tabloid is the same as the original tabloid."
+  (t/testing
+      "The cardinality of the details tabloid is the same as the original tabloid."
     (t/is (= (count glog) (count details)))))
 
 (t/deftest glog-type-test
-  (t/testing "The tabloid structure is a lazy sequence of some Map."
+  (t/testing
+      "The tabloid structure is a lazy sequence of some Map."
     (t/is (= clojure.lang.LazySeq (type glog)))
     (t/is (= clojure.lang.PersistentArrayMap (type (last glog))))))
 
 (t/deftest glog-contains-data-test
-  (t/testing "Ensure that we have some data in the glog."
-    (let [card (count glog)]
+  (t/testing
+      "Ensure that we have some data in the glog."
+    (let [card  (count glog)
+          card2 (count glog-preproc-raw)
+          card3 (count glog-preproc)]
       (do
-        (printf "glog cardinality: %s%n" card)
+        (printf "cardinality glog:             %s%n" card)
+        (printf "cardinality glog-preproc-raw: %s%n" card2)
+        (printf "cardinality glog-preproc:     %s%n" card3)
+        (spit (str (System/getenv "___glog_file") ".analysis.json") (json/write-str glog-preproc))
         (t/is (> card 30 ))))))
+
+(t/deftest glog-preproc-raw-cardinality-test
+  (t/testing
+      "The cardinality of glog-preproc in raw format is twice the original tabloid."
+    (t/is (= (count glog-preproc-raw) (* 2 (count glog))))))
+
+(t/deftest glog-preproc-cardinality-test
+  (t/testing
+      "The cardinality of glog-preproc is smaller than the raw."
+    (t/is (< (count glog-preproc) (count glog-preproc-raw)))))
