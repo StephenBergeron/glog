@@ -3,13 +3,54 @@
             [glog.core :as sut]
             [clojure.set :as set]
             [clojure.data.json :as json]
-            [clojure.data :as data]))
+            [clojure.data :as data]
+            [clojure.java.shell :as shell]))
 
 (def glog
   "The glog file content in a tabloid data structure."
   (map json/read-str
        (clojure.string/split
         (slurp (System/getenv "___glog_file")) #"\n")))
+
+(t/deftest glog-type-test
+  (t/testing
+      "The glog tabloid structure is a lazy sequence of some Map."
+    (t/is (= clojure.lang.LazySeq (type glog)))
+    (t/is (= clojure.lang.PersistentArrayMap (type (last glog))))))
+
+(t/deftest glog-cardinality-test
+  (t/testing
+      "The cardinality of glog is sufficient to do some analysis."
+    (do
+      (printf "cardinality glog: %s%n" (count glog))
+      (t/is (> (count glog) 30)))))
+
+
+(defn delta-chain
+  "Take a raw tabloid structure and compute the change for each step delta."
+  [tabl]
+  (loop [p0  0
+         p1  1
+         acc [(first tabl)]] ; the first item must be fully visible
+    (if (< p1 (count tabl))
+        (let [h0 (nth tabl p0)
+              h1 (nth tabl p1)
+              [_ delta _]  (data/diff h0 h1)]
+          (recur p1 (+ p1 1) (conj acc delta)))
+        (lazy-seq acc))))
+
+(def glog-delta (delta-chain glog))
+
+
+(t/deftest glog-delta-cardinality-test
+  (t/testing
+      "The cardinality of glog-delta is the same as the original tabloid."
+    (let [fdelta (str (System/getenv "___glog_file") ".delta.json") ]
+      (do
+        (printf "Generate glog-delta. Cardinality glog-delta: %s%n" (count glog-delta))
+        (spit fdelta (json/write-str glog-delta))
+        (shell/sh "emacs" fdelta)
+        (t/is (= (count glog-delta) (count glog)))))))
 
 
 
@@ -28,21 +69,16 @@
   (map (fn [x] (apply (partial dissoc x) lowpass)) glog))
 
 (def header-visibility
-  (loop [p0  0
-         p1  1
-         acc [(first header)]] ; the first item must have a visible header
-    (if (< p1 (count header))
-        (let [h0 (nth header p0)
-              h1 (nth header p1)
-              [_ delta _]  (data/diff h0 h1)]
-          (recur p1 (+ p1 1) (conj acc delta)))
-        (lazy-seq acc))))
+  (delta-chain header))
 
 (def glog-preproc-raw
   (interleave header-visibility details))
 
 (def glog-preproc
   (remove nil? glog-preproc-raw))
+
+
+
 
 ;; (t/deftest adhoc-test
 ;;   (t/testing "Run some adhoc evaluation."
@@ -74,12 +110,6 @@
       "The cardinality of the details tabloid is the same as the original tabloid."
     (t/is (= (count glog) (count details)))))
 
-(t/deftest glog-type-test
-  (t/testing
-      "The tabloid structure is a lazy sequence of some Map."
-    (t/is (= clojure.lang.LazySeq (type glog)))
-    (t/is (= clojure.lang.PersistentArrayMap (type (last glog))))))
-
 (t/deftest glog-contains-data-test
   (t/testing
       "Ensure that we have some data in the glog."
@@ -87,7 +117,6 @@
           card2 (count glog-preproc-raw)
           card3 (count glog-preproc)]
       (do
-        (printf "cardinality glog:             %s%n" card)
         (printf "cardinality glog-preproc-raw: %s%n" card2)
         (printf "cardinality glog-preproc:     %s%n" card3)
         (spit (str (System/getenv "___glog_file") ".analysis.json") (json/write-str glog-preproc))

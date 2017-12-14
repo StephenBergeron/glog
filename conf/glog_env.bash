@@ -47,8 +47,7 @@ function glog_json_key_file() {
 
     glog_json_open
     printf ", \"event\": \"%s\"" "$event"
-    printf ", \"key\": \"%s\"" "$key"
-    printf ", \"val\": {\"file\":   \"%s\"}" "$file"
+    printf ", \"%s\": {\"file\":   \"%s\"}" "$key" "$file"
     glog_json_close
 }
 export -f glog_json_key_file
@@ -56,29 +55,11 @@ export -f glog_json_key_file
 
 #
 # Public functions
-function ___glog_pad_________() {
-    pad_short=$(printf '%0.1s' "-"{1..8})
-
-    glog_json_open                          >> ${___glog_file} 2>&1
-    printf ", \"pad\": \"%s\"" "$pad_short" >> ${___glog_file} 2>&1
-    glog_json_close                         >> ${___glog_file} 2>&1
-}
-
-function ___glog_obsolete() {
-    key=$1
-    msg=$2
-    glog_json_open  >> ${___glog_file} 2>&1
-    printf ", \"key\": \"%s\"" "$key" >> ${___glog_file} 2>&1
-    printf ", \"val\": {\"msg\":   \"%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s\"}" "$msg" >> ${___glog_file} 2>&1
-    glog_json_close  >> ${___glog_file} 2>&1
-}
-
 function ___glog() {
     key=$1
     msg=$2
     glog_json_open  >> ${___glog_file} 2>&1
-    printf ", \"key\": \"%s\"" "$key" >> ${___glog_file} 2>&1
-    printf ", \"val\": {\"msg\":   \"%s\"}" "$msg" >> ${___glog_file} 2>&1
+    printf ", \"%s\": \"%s\"" "$key" "$msg" >> ${___glog_file} 2>&1
     glog_json_close  >> ${___glog_file} 2>&1
 }
 
@@ -89,7 +70,6 @@ function ___glog_redirect() {
 }
 
 export -f ___glog_init
-export -f ___glog_pad_________
 export -f ___glog
 export -f ___glog_redirect
 
