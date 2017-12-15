@@ -27,6 +27,9 @@ export -f glog_json_open
 # *Private* function
 # [-] The standard footer of a json glog element
 function glog_json_close() {
+    printf ", \"openam_url\": \"${openam_url}\""
+    printf ", \"redis_url\": \"${redis_url}\""
+    printf ", \"buildnumber\": \"${buildnumber}\""
     printf ", \"wfm_cloudappname\": \"${wfm_cloudappname}\""
     printf ", \"simulation\": \"%s\"" "${simulation}"
     printf ", \"db_dump\": \"%s\"" "$db_dump"
