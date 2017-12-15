@@ -16,7 +16,10 @@
   (t/testing
       "The glog tabloid structure is a lazy sequence of some Map."
     (t/is (= clojure.lang.LazySeq (type glog)))
-    (t/is (= clojure.lang.PersistentArrayMap (type (last glog))))))
+    (let [tlg (type (last glog))
+          pam (= clojure.lang.PersistentArrayMap tlg)
+          phm (= clojure.lang.PersistentHashMap tlg)]
+      (t/is (or pam phm) ))))
 
 (t/deftest glog-cardinality-test
   (t/testing
@@ -49,7 +52,7 @@
       (do
         (printf "Generate glog-delta. Cardinality glog-delta: %s%n" (count glog-delta))
         (spit fdelta (json/write-str glog-delta))
-        (shell/sh "emacs" fdelta)
+        ;(shell/sh "emacs" fdelta)
         (t/is (= (count glog-delta) (count glog)))))))
 
 
