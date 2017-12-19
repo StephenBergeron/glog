@@ -28,6 +28,14 @@
       (printf "cardinality glog: %s%n" (count glog))
       (t/is (> (count glog) 30)))))
 
+(t/deftest glog-cloudapp-test
+  (t/testing
+      "There are at least one cloudapp to analyze."
+    (let [capps (distinct (map (fn [x] (get x "wfm_cloudappname")) glog))]
+      (do
+        (doseq [app capps]
+          (printf "cloudapp: %s%n" app))
+        (t/is (> (count capps) 0))))))
 
 (defn delta-chain
   "Take a raw tabloid structure and compute the change for each step delta."
@@ -50,7 +58,7 @@
       "The cardinality of glog-delta is the same as the original tabloid."
     (let [fdelta (str (System/getenv "___glog_file") ".delta.json") ]
       (do
-        (printf "Generate glog-delta. Cardinality glog-delta: %s%n" (count glog-delta))
+        (printf "Cardinality glog-delta: %s%n" (count glog-delta))
         (spit fdelta (json/write-str glog-delta))
         ;(shell/sh "emacs" fdelta)
         (t/is (= (count glog-delta) (count glog)))))))

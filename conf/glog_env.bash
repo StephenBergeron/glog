@@ -27,6 +27,11 @@ export -f glog_json_open
 # *Private* function
 # [-] The standard footer of a json glog element
 function glog_json_close() {
+    printf ", \"PGHOST\": \"${PGHOST}\""
+    printf ", \"PGDATABASE\": \"${PGDATABASE}\""
+    printf ", \"dt_agent\": \"${dt_agent}\""
+    printf ", \"dt_profile\": \"${dt_profile}\""
+
     printf ", \"openam_url\": \"${openam_url}\""
     printf ", \"redis_url\": \"${redis_url}\""
     printf ", \"buildnumber\": \"${buildnumber}\""
