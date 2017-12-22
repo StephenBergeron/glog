@@ -12,6 +12,17 @@
        (clojure.string/split
         (slurp (System/getenv "___glog_file")) #"\n")))
 
+;; ;; ---
+;; ;; TODO - need to add string delimiter with
+;; ;;   left delimiter  "msg":
+;; ;;   right delimiter "}"
+;; ;; TODO - round the log file timestamp to the minute
+;; ;;   As far as the sequence is correct, we don't care about fraction of seconds
+;; (defn wfc-log [file]
+;;   (map json/read-str
+;;        (clojure.string/split
+;;         (slurp file) #"\n")))
+
 (t/deftest glog-type-test
   (t/testing
       "The glog tabloid structure is a lazy sequence of some Map."
@@ -60,7 +71,6 @@
       (do
         (printf "Cardinality glog-delta: %s%n" (count glog-delta))
         (spit fdelta (json/write-str glog-delta))
-        ;(shell/sh "emacs" fdelta)
         (t/is (= (count glog-delta) (count glog)))))))
 
 
