@@ -1,8 +1,8 @@
 #!/bin/bash
 
 ########################################################################
-# Tired of searching for log content; and redirect; and logs and..
-# Centralize and uniformize
+# Tired of searching for log content; and redirect; and logs and...
+# Centralize and use a uniform format
 ########################################################################
 
 # ######   #     #  ######   #        ###   #####
@@ -101,7 +101,8 @@ export ___glog_file="$CACHEDIR/glog.json"
 # *Private* function
 # [-] The standard header of a json glog element
 function glog_json_open() {
-    printf "{\"ts\": \"$(date --utc +"%m %d %Y %H:%M:%S")\""
+    printf "{\"ts\": \"$(date -u)\""
+    printf ", \"ts_epoch\": \"$(date +%s)\""
 }
 export -f glog_json_open
 
