@@ -110,22 +110,6 @@ export -f glog_json_open
 # *Private* function
 # [-] The standard footer of a json glog element
 function glog_json_close() {
-    printf ", \"PGHOST\": \"${PGHOST}\""
-    printf ", \"db_server\": \"${db_server}\""
-    printf ", \"PGDATABASE\": \"${PGDATABASE}\""
-    printf ", \"db_name\": \"${CACHEDIR}\""
-    printf ", \"db_dump\": \"%s\"" "$db_dump"
-
-    printf ", \"dt_agent\": \"${dt_agent}\""
-    printf ", \"dt_profile\": \"${dt_profile}\""
-
-    printf ", \"openam_url\": \"${openam_url}\""
-    printf ", \"redis_url\": \"${redis_url}\""
-    printf ", \"buildnumber\": \"${buildnumber}\""
-    printf ", \"wfm_cloudappname\": \"${wfm_cloudappname}\""
-
-    printf ", \"simulation\": \"%s\"" "${simulation}"
-    printf ", \"CACHEDIR\": \"${CACHEDIR}\""
     printf ", \"context\": \"${___glog_context}\""
     printf "}\n"
 }
